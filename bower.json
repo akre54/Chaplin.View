@@ -1,6 +1,6 @@
 {
   "name": "chaplin.view",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "homepage": "https://github.com/akre54/chaplin.view",
   "author": "Adam Krebs <amk528@cs.nyu.edu>",
   "description": "Base View and CollectionView classes from Chaplin",
