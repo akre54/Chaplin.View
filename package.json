@@ -1,6 +1,6 @@
 {
   "name": "chaplin.view",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Adam Krebs <amk528@cs.nyu.edu>",
   "description": "Base View and CollectionView classes from Chaplin",
   "licence": "MIT",
