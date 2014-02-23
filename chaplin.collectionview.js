@@ -217,7 +217,7 @@
   initLoadingIndicator: function() {
     // The loading indicator only works for Collections
     // which are SyncMachines.
-    if (!this.loadingSelector && typeof this.collection.isSyncing === 'function') return;
+    if (!(this.loadingSelector && typeof this.collection.isSyncing === 'function')) return;
 
     // Set the $loading property.
     this.$loading = this.$(this.loadingSelector);
