@@ -172,7 +172,7 @@
 
       if (this.model) {
         // utils.serialize(this.model);
-        data = _.clone(model.attributes);
+        data = _.clone(this.model.attributes);
       } else if (this.collection) {
         data = {
           //items: utils.serialize(this.collection),
