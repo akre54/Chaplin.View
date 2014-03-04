@@ -89,7 +89,7 @@
   // Hides excluded items by default.
   filterCallback: function (view, included) {
     view.$el.stop(true, true);
-    toggleElement(view.$el, included);
+    view.$el.toggle(included);
   },
 
   // View lists
