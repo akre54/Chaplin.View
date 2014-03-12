@@ -256,7 +256,7 @@
 
   // Applies a filter to the collection view.
   // Expects an iterator function as first parameter
-  // which need to return true or false.
+  // which needs to return true or false.
   // Optional filter callback which is called to
   // show/hide the view or mark it otherwise as filtered.
   filter: function (filterer, filterCallback) {
