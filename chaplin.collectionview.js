@@ -293,7 +293,7 @@
 
         // Update visibleItems list, but do not trigger an event immediately.
         this.updateVisibleItems(view.model, included, false);
-      });
+      }, this);
     }
 
     // Trigger a combined `visibilityChange` event.
@@ -313,17 +313,17 @@
     this.collection.each(function(item) {
       var view = this.subview("itemView:" + item.cid);
       if (view) remainingViewsByCid[item.cid] = view;
-    });
+    }, this);
 
     // Remove old views of items not longer in the list.
     var itemViews = this.getItemViews();
     _.each(itemViews, function(view, cid) {
       if (!_.has(itemViews, cid)) return;
       if (!(cid in remainingViewsByCid)) this.removeSubview("itemView:" + cid);
-    });
+    }, this);
 
     // Re-insert remaining items; render and insert new items.
-    this.collection.each(function(item) {
+    this.collection.each(function(item, index) {
       var view = this.subview("itemView:" + item.cid);
 
       if (view) {
@@ -333,7 +333,7 @@
         // Create a new view, render and insert it.
         this.insertView(item, this.renderItem(item), index)
       }
-    });
+    }, this);
 
     // If no view was created, trigger `visibilityChange` event manually.
     if (this.collection.length === 0) this.trigger('visibilityChange', this.visibleItems);
@@ -362,7 +362,7 @@
   // on the model type or data.
   initItemView: function (model) {
     if (this.itemView) {
-      new this.itemView({autoRender: false, model: model});
+      return new this.itemView({autoRender: false, model: model});
     } else {
       throw new Error('The CollectionView#itemView property ' +
         'must be defined or the initItemView() must be overridden.');
@@ -398,6 +398,7 @@
     // Insert the view into the list.
     var insertInMiddle = (0 < position && position < length);
     var isEnd = function (length) { return length === 0 || position === length; };
+    var elem = view.$el;
 
     if (insertInMiddle || this.itemSelector) {
       // Get the children which originate from item views.
