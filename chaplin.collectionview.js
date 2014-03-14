@@ -293,7 +293,7 @@
 
         // Update visibleItems list, but do not trigger an event immediately.
         this.updateVisibleItems(view.model, included, false);
-      });
+      }, this);
     }
 
     // Trigger a combined `visibilityChange` event.
@@ -313,14 +313,14 @@
     this.collection.each(function(item) {
       var view = this.subview("itemView:" + item.cid);
       if (view) remainingViewsByCid[item.cid] = view;
-    });
+    }, this);
 
     // Remove old views of items not longer in the list.
     var itemViews = this.getItemViews();
     _.each(itemViews, function(view, cid) {
       if (!_.has(itemViews, cid)) return;
       if (!(cid in remainingViewsByCid)) this.removeSubview("itemView:" + cid);
-    });
+    }, this);
 
     // Re-insert remaining items; render and insert new items.
     this.collection.each(function(item) {
@@ -333,7 +333,7 @@
         // Create a new view, render and insert it.
         this.insertView(item, this.renderItem(item), index)
       }
-    });
+    }, this);
 
     // If no view was created, trigger `visibilityChange` event manually.
     if (this.collection.length === 0) this.trigger('visibilityChange', this.visibleItems);
