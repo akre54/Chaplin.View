@@ -323,7 +323,7 @@
     }, this);
 
     // Re-insert remaining items; render and insert new items.
-    this.collection.each(function(item) {
+    this.collection.each(function(item, index) {
       var view = this.subview("itemView:" + item.cid);
 
       if (view) {
