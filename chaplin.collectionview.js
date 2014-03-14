@@ -398,6 +398,7 @@
     // Insert the view into the list.
     var insertInMiddle = (0 < position && position < length);
     var isEnd = function (length) { return length === 0 || position === length; };
+    var elem = view.$el;
 
     if (insertInMiddle || this.itemSelector) {
       // Get the children which originate from item views.
