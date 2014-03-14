@@ -362,7 +362,7 @@
   // on the model type or data.
   initItemView: function (model) {
     if (this.itemView) {
-      new this.itemView({autoRender: false, model: model});
+      return new this.itemView({autoRender: false, model: model});
     } else {
       throw new Error('The CollectionView#itemView property ' +
         'must be defined or the initItemView() must be overridden.');
