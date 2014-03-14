@@ -64,7 +64,7 @@
 
     constructor: function (options) {
       // Copy some options to instance properties.
-      _.extend(this, _.pick(options, this.optionNames));
+      options && _.extend(this, _.pick(options, this.optionNames));
 
       // Wrap `render` so `attach` is called afterwards.
       // Enclose the original function.
