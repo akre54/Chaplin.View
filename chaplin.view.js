@@ -1,4 +1,4 @@
-// Chaplin.View.js 0.1.5
+// Chaplin.View.js 0.1.6
 // ---------------
 
 //     (c) 2014 Adam Krebs, Chaplin.js contributors
