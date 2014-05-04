@@ -255,9 +255,6 @@
     dispose: function() {
       if (this.disposed) return;
 
-      // Unregister all regions.
-      this.unregisterAllRegions();
-
       // Dispose subviews.
       _.invoke(this.subviews, 'dispose');
 
