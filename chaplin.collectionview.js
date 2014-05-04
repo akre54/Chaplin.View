@@ -7,10 +7,10 @@
 //     https://github.com/akre54/Chaplin.View
 
 (function (factory) {
-  if (typeof define === 'function' && define.amd) { define(['underscore', 'chaplin.view'], factory);
-  } else if (typeof exports === 'object') { factory(require('underscore'), require('./chaplin.view'));
-  } else { factory(_, Backbone.Chaplin.View); }
-}(function (_, ChaplinView) {
+  if (typeof define === 'function' && define.amd) { define(['underscore', 'backbone', 'chaplin.view'], factory);
+  } else if (typeof exports === 'object') { module.exports = factory(require('underscore'), require('backbone'), require('./chaplin.view'));
+  } else { factory(_, Backbone, Backbone.Chaplin.View); }
+}(function (_, Backbone, ChaplinView) {
 
   // Chaplin's CollectionView class allows for easy display of all items in a
   // Collection-backed View. It handles automatic insertion and removal.

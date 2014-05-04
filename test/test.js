@@ -1,13 +1,12 @@
-require("chai").should();
-global._ = require('underscore');
-global.Backbone = require('backbone');
-require('../chaplin.view');
+var should = require("chai").should(),
+    _ = require('underscore'),
+    Backbone = require('backbone'),
+    View = require('../chaplin.view'),
+    CollectionView = require('../chaplin.collectionview');
 
 describe('Backbone.Chaplin.View', function() {
 
 });
-
-require('../chaplin.collectionview');
 
 describe('Backbone.Chaplin.CollectionView', function() {
 
