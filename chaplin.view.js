@@ -235,8 +235,8 @@
     attach: function() {
 
       // Automatically append to DOM if the container element is set.
-      if (this.container && !document.body.contains(this.el)) {
-        var $container = $(this.container);
+      if (this.container && !Backbone.$.contains(document.body, this.el)) {
+        var $container = Backbone.$(this.container);
         if (typeof this.containerMethod == 'function') {
           this.containerMethod($container, this.el);
         } else {
