@@ -525,27 +525,27 @@ describe('Backbone.Chaplin.View', function() {
     expect(items[1]).to.be.an('object');
     expect(items[1].bar).to.equal('bar');
   });
-  it('should add the SyncMachine state to the template data', function() {
-    setModel();
-    _.extend(model, SyncMachine);
-    var templateData = view.getTemplateData();
-    expect(templateData.synced).to.be.false;
-    model.beginSync();
-    model.finishSync();
-    templateData = view.getTemplateData();
-    expect(templateData.synced).to.be.true;
-  });
-  it('should not cover existing SyncMachine properties', function() {
-    setModel();
-    _.extend(model, SyncMachine);
-    model.set({
-      syncState: 'foo',
-      synced: 'bar'
-    });
-    var templateData = view.getTemplateData();
-    expect(templateData.syncState).to.equal('foo');
-    expect(templateData.synced).to.equal('bar');
-  });
+  // it('should add the SyncMachine state to the template data', function() {
+  //   setModel();
+  //   _.extend(model, SyncMachine);
+  //   var templateData = view.getTemplateData();
+  //   expect(templateData.synced).to.be.false;
+  //   model.beginSync();
+  //   model.finishSync();
+  //   templateData = view.getTemplateData();
+  //   expect(templateData.synced).to.be.true;
+  // });
+  // it('should not cover existing SyncMachine properties', function() {
+  //   setModel();
+  //   _.extend(model, SyncMachine);
+  //   model.set({
+  //     syncState: 'foo',
+  //     synced: 'bar'
+  //   });
+  //   var templateData = view.getTemplateData();
+  //   expect(templateData.syncState).to.equal('foo');
+  //   expect(templateData.synced).to.equal('bar');
+  // });
   describe('Events', function() {
     var EventedViewParent = View.extend({
       listen: {
@@ -578,8 +578,8 @@ describe('Backbone.Chaplin.View', function() {
         'change:b model': 'b2Handler',
         'reset collection': 'a2Handler',
         'custom collection': 'b2Handler',
-        'ns:a mediator': 'a2Handler',
-        'ns:b mediator': 'b2Handler'
+        // 'ns:a mediator': 'a2Handler',
+        // 'ns:b mediator': 'b2Handler'
       },
 
       initialize: function() {
@@ -647,23 +647,23 @@ describe('Backbone.Chaplin.View', function() {
       expect(view.b1Handler.calledOnce).to.be.true;
       expect(view.b2Handler.calledOnce).to.be.true;
     });
-    it('should bind to mediator events declaratively', function() {
-      view = new EventedView();
-      expect(view.a1Handler.called).to.be.false;
-      expect(view.a2Handler.called).to.be.false;
-      expect(view.b1Handler.called).to.be.false;
-      expect(view.b2Handler.called).to.be.false;
-      mediator.publish('ns:a');
-      expect(view.a1Handler.calledOnce).to.be.true;
-      expect(view.a2Handler.calledOnce).to.be.true;
-      expect(view.b1Handler.called).to.be.false;
-      expect(view.b2Handler.called).to.be.false;
-      mediator.publish('ns:b');
-      expect(view.a1Handler.calledOnce).to.be.true;
-      expect(view.a2Handler.calledOnce).to.be.true;
-      expect(view.b1Handler.calledOnce).to.be.true;
-      expect(view.b2Handler.calledOnce).to.be.true;
-    });
+    // it('should bind to mediator events declaratively', function() {
+    //   view = new EventedView();
+    //   expect(view.a1Handler.called).to.be.false;
+    //   expect(view.a2Handler.called).to.be.false;
+    //   expect(view.b1Handler.called).to.be.false;
+    //   expect(view.b2Handler.called).to.be.false;
+    //   mediator.publish('ns:a');
+    //   expect(view.a1Handler.calledOnce).to.be.true;
+    //   expect(view.a2Handler.calledOnce).to.be.true;
+    //   expect(view.b1Handler.called).to.be.false;
+    //   expect(view.b2Handler.called).to.be.false;
+    //   mediator.publish('ns:b');
+    //   expect(view.a1Handler.calledOnce).to.be.true;
+    //   expect(view.a2Handler.calledOnce).to.be.true;
+    //   expect(view.b1Handler.calledOnce).to.be.true;
+    //   expect(view.b2Handler.calledOnce).to.be.true;
+    // });
     it('should throw an error when corresponding method doesn’t exist', function() {
       var ErrorView = View.extend({
         listen: {
