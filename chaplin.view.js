@@ -58,8 +58,7 @@
     optionNames: [
       'autoAttach', 'autoRender',
       'container', 'containerMethod',
-      'region', 'regions',
-      'noWrap'
+      'region', 'regions'
     ],
 
     constructor: function (options) {

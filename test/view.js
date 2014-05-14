@@ -247,22 +247,22 @@ describe('Backbone.Chaplin.View', function() {
   //   instance1.dispose();
   //   return instance2.dispose();
   // });
-  it('should not wrap el with `tagName`', function() {
-    var Test3View = View.extend({
-      autoRender: true,
-      tagName: 'section',
-      noWrap: true,
-      container: testbed,
-      getTemplateFunction: function() {
-        return function() {
-          return '<div><p>View is not wrapped!</p><p>baz</p></div>';
-        };
-      }
-    });
-    var instance1 = new Test3View();
-    expect(instance1.el.parentElement.querySelector('section')).to.equal(null);
-    return instance1.dispose();
-  });
+  // it('should not wrap el with `tagName`', function() {
+  //   var Test3View = View.extend({
+  //     autoRender: true,
+  //     tagName: 'section',
+  //     noWrap: true,
+  //     container: testbed,
+  //     getTemplateFunction: function() {
+  //       return function() {
+  //         return '<div><p>View is not wrapped!</p><p>baz</p></div>';
+  //       };
+  //     }
+  //   });
+  //   var instance1 = new Test3View();
+  //   expect(instance1.el.parentElement.querySelector('section')).to.equal(null);
+  //   return instance1.dispose();
+  // });
   it('should fire an addedToDOM event attaching itself to the DOM', function() {
     var spy;
     view = new TestView({
