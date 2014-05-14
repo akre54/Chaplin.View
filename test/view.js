@@ -1,7 +1,3 @@
-var jsdom = require('jsdom').jsdom;
-global.document = jsdom('<html><body><div id="mocha"></div><div id="testbed"></div></body></html>');
-global.window = document.parentWindow;
-
 var expect = require('chai').expect,
     sinon = require('sinon'),
     $ = require('jquery'),
@@ -9,10 +5,7 @@ var expect = require('chai').expect,
     Backbone = require('backbone'),
     View = require('../chaplin.view');
 
-Backbone.$ = $;
-
 describe('Backbone.Chaplin.View', function() {
-  var simulateEvent;
   var renderCalled = false;
       view = model = collection = null,
       template = '<p>content</p>',
@@ -22,6 +15,7 @@ describe('Backbone.Chaplin.View', function() {
     renderCalled = false;
     view = new TestView;
   });
+
   afterEach(function() {
     view.dispose();
     view = null;
@@ -38,17 +32,20 @@ describe('Backbone.Chaplin.View', function() {
       collection = null;
     }
   });
+
   var setModel = function() {
-    model = new Model({
+    model = new Backbone.Model({
       foo: 'foo',
       bar: 'bar'
     });
     return view.model = model;
   };
+
   var setCollection = function() {
     collection = new Collection;
     view.collection = collection;
   };
+
   var delay = function(callback) {
     return window.setTimeout(callback, 40);
   };
@@ -84,7 +81,7 @@ describe('Backbone.Chaplin.View', function() {
   //   for (var name in EventBroker) {
   //     if (!_.has(EventBroker, name)) continue;
   //     var value = EventBroker[name];
-  //     expect(view[name]).to.be(EventBroker[name]);
+  //     expect(view[name]).to.equal(EventBroker[name]);
   //   }
   // });
   it('should render', function() {
@@ -110,30 +107,30 @@ describe('Backbone.Chaplin.View', function() {
       return new View({
         autoRender: true
       });
-    }).to.throw();
+    }).to.throw(Error, /must be overridden/);
   });
   it('should attach itself to an element automatically', function() {
     view = new TestView({
       container: testbed
     });
-    expect(renderCalled).to.be(false);
-    expect(view.el.parentNode).to.be(null);
+    expect(renderCalled).to.be.false;
+    expect(view.el.parentNode).to.equal(null);
     view.render();
-    expect(view.el.parentNode).to.be(testbed);
+    expect(view.el.parentNode).to.equal(testbed);
   });
   it('should attach itself to a selector automatically', function() {
     view = new TestView({
       container: '#testbed'
     });
     view.render();
-    expect(view.el.parentNode).to.be(testbed);
+    expect(view.el.parentNode).to.equal(testbed);
   });
   it('should attach itself to a jQuery object automatically', function() {
     view = new TestView({
       container: $('#testbed')
     });
     view.render();
-    expect(view.el.parentNode).to.be(testbed);
+    expect(view.el.parentNode).to.equal(testbed);
   });
   it('should use the given attach method', function() {
     var containerMethod, customContainerMethod;
@@ -148,14 +145,14 @@ describe('Backbone.Chaplin.View', function() {
       containerMethod: containerMethod
     });
     view.render();
-    expect(view.el).to.be(testbed.nextSibling);
-    expect(view.el.parentNode).to.be(testbed.parentNode);
+    expect(view.el).to.equal(testbed.nextSibling);
+    expect(view.el.parentNode).to.equal(testbed.parentNode);
   });
   it('should consider autoRender, container and containerMethod properties', function() {
     view = new ConfiguredTestView();
-    expect(renderCalled).to.be(true);
-    expect(view.el).to.be(testbed.previousSibling);
-    expect(view.el.parentNode).to.be(testbed.parentNode);
+    expect(renderCalled).to.be.true;
+    expect(view.el).to.equal(testbed.previousSibling);
+    expect(view.el.parentNode).to.equal(testbed.parentNode);
   });
   it('should not attach itself more than once', function() {
     var spy;
@@ -165,7 +162,7 @@ describe('Backbone.Chaplin.View', function() {
     });
     view.render();
     view.render();
-    expect(spy.calledOnce).to.be(true);
+    expect(spy.calledOnce).to.be.true;
   });
   it('should not attach itself if autoAttach is false', function() {
     var NoAutoAttachView1 = View.extend({
@@ -184,20 +181,19 @@ describe('Backbone.Chaplin.View', function() {
     });
 
     var check = function(view) {
-      var parent;
-      parent = view.el.parentNode;
+      var parent = view.el.parentNode;
       if (parent) {
-        return expect(parent.nodeType).to.be(11);
+        return expect(parent.nodeType).to.equal(11);
       } else {
-        return expect(parent).to.be(null);
+        return expect(parent).to.equal(null);
       }
     };
     var view1 = new NoAutoAttachView1;
     window.view1 = view1;
-    expect(view1.attach).was.notCalled();
+    expect(view1.attach.called).to.be.false
     check(view1);
     var view2 = new NoAutoAttachView2;
-    expect(view2.attach).was.notCalled();
+    expect(view2.attach.called).to.be.false;
     check(view2);
   });
   // it('should not wrap el with `tagName` when using a region', function() {
@@ -247,38 +243,24 @@ describe('Backbone.Chaplin.View', function() {
   //   })(View);
   //   instance1 = new Test1View();
   //   instance2 = new Test2View();
-  //   expect(instance2.el.parentElement.querySelector('section')).to.be(null);
+  //   expect(instance2.el.parentElement.querySelector('section')).to.equal(null);
   //   instance1.dispose();
   //   return instance2.dispose();
   // });
   it('should not wrap el with `tagName`', function() {
-    var Test3View, instance1, viewWrap;
-    viewWrap = Test3View = (function(_super) {
-      __extends(Test3View, _super);
-
-      function Test3View() {
-        return Test3View.__super__.constructor.apply(this, arguments);
-      }
-
-      Test3View.prototype.autoRender = true;
-
-      Test3View.prototype.tagName = 'section';
-
-      Test3View.prototype.noWrap = true;
-
-      Test3View.prototype.container = testbed;
-
-      Test3View.prototype.getTemplateFunction = function() {
+    var Test3View = View.extend({
+      autoRender: true,
+      tagName: 'section',
+      noWrap: true,
+      container: testbed,
+      getTemplateFunction: function() {
         return function() {
           return '<div><p>View is not wrapped!</p><p>baz</p></div>';
         };
-      };
-
-      return Test3View;
-
-    })(View);
-    instance1 = new Test3View();
-    expect(instance1.el.parentElement.querySelector('section')).to.be(null);
+      }
+    });
+    var instance1 = new Test3View();
+    expect(instance1.el.parentElement.querySelector('section')).to.equal(null);
     return instance1.dispose();
   });
   it('should fire an addedToDOM event attaching itself to the DOM', function() {
@@ -289,7 +271,7 @@ describe('Backbone.Chaplin.View', function() {
     spy = sinon.spy();
     view.on('addedToDOM', spy);
     view.render();
-    expect(spy).was.called();
+    expect(spy.called).to.be.true;
   });
   it('should register and remove user input event handlers', function() {
     var handler, p, spy;
@@ -304,24 +286,25 @@ describe('Backbone.Chaplin.View', function() {
     expect(handler).to.be.a('function');
     view.render();
     window.clickOnElement(view.el);
-    expect(spy).was.called();
+    expect(spy.called).to.be.true;
     view.undelegate();
     window.clickOnElement(view.el);
-    expect(spy.callCount).to.be(1);
+    expect(spy.callCount).to.equal(1);
     spy = sinon.spy();
     handler = view.delegate('click', 'p', spy);
     expect(handler).to.be.a('function');
     p = view.el.querySelector('p');
     window.clickOnElement(p);
-    expect(spy).was.called();
+    expect(spy.called).to.be.true;
     expect(function() {
       return view.delegate(spy);
-    }).to.throwError();
+    }).to.throw(Error);
     view.undelegate();
     window.clickOnElement(p);
-    expect(spy.callCount).to.be(1);
+    expect(spy.callCount).to.equal(1);
   });
-  simulateEvent = function(target, eventName, options) {
+
+  var simulateEvent = function(target, eventName, options) {
     var evt, oEvent;
     if (options == null) {
       options = {};
@@ -348,27 +331,27 @@ describe('Backbone.Chaplin.View', function() {
     view.delegate('focus', spy2);
     view.render();
     window.clickOnElement(view.el);
-    expect(spy).was.calledOnce();
-    expect(spy2).was.notCalled();
+    expect(spy.calledOnce).to.be.true;
+    expect(spy2.called).to.be.false;
     view.undelegate('click');
     simulateEvent(view.el, 'focus');
     window.clickOnElement(view.el);
-    expect(spy).was.calledOnce();
-    expect(spy2).was.calledOnce();
+    expect(spy.calledOnce).to.be.true;
+    expect(spy2.calledOnce).to.be.true;
   });
   it('should check delegate parameters', function() {
     expect(function() {
       return view.delegate(1, 2, 3);
-    }).to.throwError();
+    }).to.throw(Error);
     expect(function() {
       return view.delegate('click', 'foo');
-    }).to.throwError();
+    }).to.throw(Error);
     expect(function() {
       return view.delegate('click', 'foo', 'bar');
-    }).to.throwError();
+    }).to.throw(Error);
     expect(function() {
       return view.delegate('click', 123);
-    }).to.throwError();
+    }).to.throw(Error);
   });
   it('should correct inheritance of events object', function(done) {
     var A, B, C, D, bcd, d;
@@ -426,20 +409,20 @@ describe('Backbone.Chaplin.View', function() {
     delay(function() {
       var index, _i, _j, _len;
       for (index = _i = 1; _i < 5; index = ++_i) {
-        expect(d["a" + index + "Handler"]).was.calledOnce();
+        expect(d["a" + index + "Handler"].calledOnce).to.be.true;
       }
       for (_j = 0, _len = bcd.length; _j < _len; _j++) {
         index = bcd[_j];
-        expect(d["" + index + "Handler"]).was.notCalled();
+        expect(d["" + index + "Handler"].called).to.be.false;
         d.click(index);
       }
       delay(function() {
         var _k, _len1;
         for (_k = 0, _len1 = bcd.length; _k < _len1; _k++) {
           index = bcd[_k];
-          expect(d["" + index + "Handler"]).was.calledOnce();
+          expect(d["" + index + "Handler"].calledOnce).to.be.true;
         }
-        expect(d.globalHandler.callCount).to.be(4);
+        expect(d.globalHandler.callCount).to.equal(4);
         done();
       });
     });
@@ -450,19 +433,19 @@ describe('Backbone.Chaplin.View', function() {
     });
     expect(function() {
       return new E;
-    }).to.throwError();
+    }).to.throw(Error);
   });
   it('should add and return subviews', function() {
     var subview, subview2;
     expect(view.subview).to.be.a('function');
     subview = new View();
     view.subview('fooSubview', subview);
-    expect(view.subview('fooSubview')).to.be(subview);
-    expect(view.subviews.length).to.be(1);
+    expect(view.subview('fooSubview')).to.equal(subview);
+    expect(view.subviews.length).to.equal(1);
     subview2 = new View();
     view.subview('fooSubview', subview2);
-    expect(view.subview('fooSubview')).to.be(subview2);
-    expect(view.subviews.length).to.be(1);
+    expect(view.subview('fooSubview')).to.equal(subview2);
+    expect(view.subviews.length).to.equal(1);
   });
   it('should remove subviews', function() {
     var subview;
@@ -470,113 +453,98 @@ describe('Backbone.Chaplin.View', function() {
     subview = new View();
     view.subview('fooSubview', subview);
     view.removeSubview('fooSubview');
-    expect(typeof view.subview('fooSubview')).to.be('undefined');
-    expect(view.subviews.length).to.be(0);
+    expect(typeof view.subview('fooSubview')).to.equal('undefined');
+    expect(view.subviews.length).to.equal(0);
     subview = new View();
     view.subview('barSubview', subview);
     view.removeSubview(subview);
-    expect(typeof view.subview('barSubview')).to.be('undefined');
-    expect(view.subviews.length).to.be(0);
+    expect(typeof view.subview('barSubview')).to.equal('undefined');
+    expect(view.subviews.length).to.equal(0);
     view.removeSubview('');
-    expect(view.subviews.length).to.be(0);
+    expect(view.subviews.length).to.equal(0);
   });
   it('should return empty template data without a model', function() {
     var templateData = view.getTemplateData();
     expect(templateData).to.be.an('object');
-    expect(_.isEmpty(templateData)).to.be(true);
+    expect(_.isEmpty(templateData)).to.be.true;
   });
   it('should return proper template data for a Chaplin model', function() {
-    var templateData;
     setModel();
-    templateData = view.getTemplateData();
+    var templateData = view.getTemplateData();
     expect(templateData).to.be.an('object');
-    expect(templateData.foo).to.be('foo');
-    expect(templateData.bar).to.be('bar');
+    expect(templateData.foo).to.equal('foo');
+    expect(templateData.bar).to.equal('bar');
   });
   it('should return template data that protects the model', function() {
     setModel();
     var templateData = view.getTemplateData();
     templateData.qux = 'qux';
-    expect(model.get('qux')).to.be(void 0);
+    expect(model.get('qux')).to.be.undefined;
   });
   it('should return proper template data for a Backbone model', function() {
-    var templateData;
     model = new Backbone.Model({
       foo: 'foo',
       bar: 'bar'
     });
     view.model = model;
-    templateData = view.getTemplateData();
+    var templateData = view.getTemplateData();
     expect(templateData).to.be.an('object');
-    expect(templateData.foo).to.be('foo');
-    expect(templateData.bar).to.be('bar');
+    expect(templateData.foo).to.equal('foo');
+    expect(templateData.bar).to.equal('bar');
   });
   it('should return proper template data for Chaplin collections', function() {
-    var data, items, model1, model2;
-    model1 = new Model({
-      foo: 'foo'
-    });
-    model2 = new Model({
-      bar: 'bar'
-    });
-    collection = new Collection([model1, model2]);
-    view.collection = collection;
-    data = view.getTemplateData();
-    expect(data).to.be.an('object');
-    expect(data).to.only.have.keys('items', 'length');
-    expect(data.length).to.be(2);
-    items = data.items;
-    expect(items).to.be.an('array');
-    expect(data.length).to.be(items.length);
-    expect(items[0]).to.be.an('object');
-    expect(items[0].foo).to.be('foo');
-    expect(items[1]).to.be.an('object');
-    expect(items[1].bar).to.be('bar');
-  });
-  it('should return proper template data for Backbone collections', function() {
-    var data, items, model1, model2;
-    model1 = new Backbone.Model({
-      foo: 'foo'
-    });
-    model2 = new Backbone.Model({
-      bar: 'bar'
-    });
+    var model1 = new Backbone.Model({foo: 'foo'}), model2 = new Backbone.Model({bar: 'bar'});
     collection = new Backbone.Collection([model1, model2]);
     view.collection = collection;
-    data = view.getTemplateData();
+    var data = view.getTemplateData();
     expect(data).to.be.an('object');
     expect(data).to.only.have.keys('items', 'length');
-    expect(data.length).to.be(2);
-    items = data.items;
+    expect(data.length).to.equal(2);
+    var items = data.items;
     expect(items).to.be.an('array');
-    expect(items.length).to.be(2);
+    expect(data.length).to.equal(items.length);
     expect(items[0]).to.be.an('object');
-    expect(items[0].foo).to.be('foo');
+    expect(items[0].foo).to.equal('foo');
     expect(items[1]).to.be.an('object');
-    expect(items[1].bar).to.be('bar');
+    expect(items[1].bar).to.equal('bar');
+  });
+  it('should return proper template data for Backbone collections', function() {
+    var model1 = new Backbone.Model({foo: 'foo'}),
+        model2 = new Backbone.Model({bar: 'bar'});
+    collection = new Backbone.Collection([model1, model2]);
+    view.collection = collection;
+    var data = view.getTemplateData();
+    expect(data).to.be.an('object');
+    expect(data).to.only.have.keys('items', 'length');
+    expect(data.length).to.equal(2);
+    var items = data.items;
+    expect(items).to.be.an('array');
+    expect(items.length).to.equal(2);
+    expect(items[0]).to.be.an('object');
+    expect(items[0].foo).to.equal('foo');
+    expect(items[1]).to.be.an('object');
+    expect(items[1].bar).to.equal('bar');
   });
   it('should add the SyncMachine state to the template data', function() {
-    var templateData;
     setModel();
     _.extend(model, SyncMachine);
-    templateData = view.getTemplateData();
-    expect(templateData.synced).to.be(false);
+    var templateData = view.getTemplateData();
+    expect(templateData.synced).to.be.false;
     model.beginSync();
     model.finishSync();
     templateData = view.getTemplateData();
-    expect(templateData.synced).to.be(true);
+    expect(templateData.synced).to.be.true;
   });
   it('should not cover existing SyncMachine properties', function() {
-    var templateData;
     setModel();
     _.extend(model, SyncMachine);
     model.set({
       syncState: 'foo',
       synced: 'bar'
     });
-    templateData = view.getTemplateData();
-    expect(templateData.syncState).to.be('foo');
-    expect(templateData.synced).to.be('bar');
+    var templateData = view.getTemplateData();
+    expect(templateData.syncState).to.equal('foo');
+    expect(templateData.synced).to.equal('bar');
   });
   describe('Events', function() {
     var EventedViewParent = View.extend({
@@ -594,7 +562,7 @@ describe('Backbone.Chaplin.View', function() {
       },
 
       initialize: function() {
-        EventedViewParent.__super__.initialize.apply(this, arguments);
+        View.prototype.initialize.apply(this, arguments);
         this.a1Handler = sinon.spy();
         this.b1Handler = sinon.spy();
       }
@@ -615,86 +583,86 @@ describe('Backbone.Chaplin.View', function() {
       },
 
       initialize: function() {
-        EventedView.__super__.initialize.apply(this, arguments);
+        EventedViewParent.prototype.initialize.apply(this, arguments);
         this.a2Handler = sinon.spy();
         this.b2Handler = sinon.spy();
       }
     });
     it('should bind to own events declaratively', function() {
       view = new EventedView({
-        model: new Model()
+        model: new Backbone.Model
       });
-      expect(view.a1Handler).was.notCalled();
-      expect(view.a2Handler).was.notCalled();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.called).to.be.false;
+      expect(view.a2Handler.called).to.be.false;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       view.trigger('ns:a');
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       view.trigger('ns:b');
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.calledOnce();
-      expect(view.b2Handler).was.calledOnce();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.calledOnce).to.be.true;
+      expect(view.b2Handler.calledOnce).to.be.true;
     });
     it('should bind to model events declaratively', function() {
-      model = new Model();
+      model = new Backbone.Model();
       view = new EventedView({
         model: model
       });
-      expect(view.a1Handler).was.notCalled();
-      expect(view.a2Handler).was.notCalled();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.called).to.be.false;
+      expect(view.a2Handler.called).to.be.false;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       model.set('a', 1);
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       model.set('b', 2);
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.calledOnce();
-      expect(view.b2Handler).was.calledOnce();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.calledOnce).to.be.true;
+      expect(view.b2Handler.calledOnce).to.be.true;
     });
     it('should bind to collection events declaratively', function() {
-      collection = new Collection();
+      collection = new Backbone.Collection();
       view = new EventedView({
         collection: collection
       });
-      expect(view.a1Handler).was.notCalled();
-      expect(view.a2Handler).was.notCalled();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.called).to.be.false;
+      expect(view.a2Handler.called).to.be.false;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       collection.reset([{a: 1}]);
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       collection.trigger('custom');
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.calledOnce();
-      expect(view.b2Handler).was.calledOnce();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.calledOnce).to.be.true;
+      expect(view.b2Handler.calledOnce).to.be.true;
     });
     it('should bind to mediator events declaratively', function() {
       view = new EventedView();
-      expect(view.a1Handler).was.notCalled();
-      expect(view.a2Handler).was.notCalled();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.called).to.be.false;
+      expect(view.a2Handler.called).to.be.false;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       mediator.publish('ns:a');
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.notCalled();
-      expect(view.b2Handler).was.notCalled();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.called).to.be.false;
+      expect(view.b2Handler.called).to.be.false;
       mediator.publish('ns:b');
-      expect(view.a1Handler).was.calledOnce();
-      expect(view.a2Handler).was.calledOnce();
-      expect(view.b1Handler).was.calledOnce();
-      expect(view.b2Handler).was.calledOnce();
+      expect(view.a1Handler.calledOnce).to.be.true;
+      expect(view.a2Handler.calledOnce).to.be.true;
+      expect(view.b1Handler.calledOnce).to.be.true;
+      expect(view.b2Handler.calledOnce).to.be.true;
     });
     it('should throw an error when corresponding method doesn’t exist', function() {
       var ErrorView = View.extend({
@@ -710,21 +678,20 @@ describe('Backbone.Chaplin.View', function() {
       });
       expect(function() {
         new ErrorView;
-      }).to.throwError();
+      }).to.throw(Error);
       expect(function() {
         new Error2View;
-      }).to.throwError();
+      }).to.throw(Error);
     });
     it('should allow passing params to delegateEvents', function(done) {
-      var spy;
-      spy = sinon.spy();
+      var spy = sinon.spy();
       view = new AutoRenderView;
       view.delegateEvents({
         'click p': spy
       });
       window.clickOnElement(view.el.querySelector('p'));
       delay(function() {
-        expect(spy).was.calledOnce();
+        expect(spy.calledOnce).to.be.true;
         done();
       });
     });
@@ -744,21 +711,19 @@ describe('Backbone.Chaplin.View', function() {
       var parent = view.el;
       var el = parent.querySelector('p');
       window.clickOnElement(el);
-      expect(spy1).was.called();
-      expect(spy2).was.called();
+      expect(spy1.called).to.be.true;
+      expect(spy2.called).to.be.true;
       view.dispose();
       window.clickOnElement(el);
-      expect(spy1.callCount).to.be(1);
-      expect(spy2.callCount).to.be(1);
+      expect(spy1.callCount).to.equal(1);
+      expect(spy2.callCount).to.equal(1);
       parent.parentNode.removeChild(parent);
     });
     it('should register event handlers on the document programatically', function() {
       var spy1 = sinon.spy(), spy2 = sinon.spy();
       var PreservedView = TestView.extend({
         autoRender: true,
-
         container: 'body',
-
         keepElement: true
       });
       view = new PreservedView;
@@ -770,150 +735,143 @@ describe('Backbone.Chaplin.View', function() {
       var parent = view.el;
       var el = parent.querySelector('p');
       window.clickOnElement(el);
-      expect(spy1).was.called();
-      expect(spy2).was.called();
+      expect(spy1.called).to.be.true;
+      expect(spy2.called).to.be.true;
       view.undelegateEvents();
       window.clickOnElement(el);
-      expect(spy1.callCount).to.be(1);
-      expect(spy2.callCount).to.be(1);
+      expect(spy1.callCount).to.equal(1);
+      expect(spy2.callCount).to.equal(1);
       parent.parentNode.removeChild(parent);
     });
   });
   it('should pass model attributes to the template function', function() {
-    var passedTemplateData, templateData, templateFunc;
     setModel();
     sinon.spy(view, 'getTemplateData');
-    passedTemplateData = null;
-    templateFunc = sinon.stub().returns(template);
+    var passedTemplateData = null;
+    var templateFunc = sinon.stub().returns(template);
     sinon.stub(view, 'getTemplateFunction').returns(templateFunc);
     view.render();
-    expect(view.getTemplateFunction).was.called();
-    expect(view.getTemplateData).was.called();
-    expect(templateFunc).was.called();
-    templateData = templateFunc.lastCall.args[0];
+    expect(view.getTemplateFunction.called).to.be.true;
+    expect(view.getTemplateData.called).to.be.true;
+    expect(templateFunc.called).to.be.true;
+    var templateData = templateFunc.lastCall.args[0];
     expect(templateData).to.be.an('object');
-    expect(templateData.foo).to.be('foo');
-    expect(templateData.bar).to.be('bar');
+    expect(templateData.foo).to.equal('foo');
+    expect(templateData.bar).to.equal('bar');
   });
   describe('Disposal', function() {
     it('should dispose itself correctly', function() {
       expect(view.dispose).to.be.a('function');
       view.dispose();
-      expect(view.disposed).to.be(true);
+      expect(view.disposed).to.be.true;
       if (Object.isFrozen) {
-        expect(Object.isFrozen(view)).to.be(true);
+        expect(Object.isFrozen(view)).to.be.true;
       }
     });
     it('should remove itself from the DOM', function() {
       view.el.id = 'disposed-view';
       document.body.appendChild(view.el);
-      expect(document.querySelector('#disposed-view')).to.be["true"];
+      expect(!!document.querySelector('#disposed-view')).to.be.true;
       view.dispose();
-      expect(document.querySelector('#disposed-view')).to.be["false"];
+      expect(!!document.querySelector('#disposed-view')).to.be.false;
     });
     it('should call Backbone.View#remove', function() {
       sinon.spy(view, 'remove');
       view.dispose();
-      expect(view.remove).was.called();
+      expect(view.remove.called).to.be.true;
     });
     it('should dispose subviews', function() {
-      var subview;
-      subview = new View();
+      var subview = new View();
       sinon.spy(subview, 'dispose');
       view.subview('foo', subview);
       view.dispose();
-      expect(subview.disposed).to.be(true);
-      expect(subview.dispose).was.called();
+      expect(subview.disposed).to.be.true;
+      expect(subview.dispose.called).to.be.true;
     });
-    it('should unsubscribe from Pub/Sub events', function() {
-      var spy;
-      spy = sinon.spy();
-      view.subscribeEvent('foo', spy);
-      view.dispose();
-      mediator.publish('foo');
-      expect(spy).was.notCalled();
-    });
-    it('should unsubscribe from model events', function() {
-      var spy;
-      setModel();
-      spy = sinon.spy();
-      view.listenTo(view.model, 'foo', spy);
-      view.dispose();
-      model.trigger('foo');
-      expect(spy).was.notCalled();
-    });
+    // it('should unsubscribe from Pub/Sub events', function() {
+    //   var spy = sinon.spy();
+    //   view.subscribeEvent('foo', spy);
+    //   view.dispose();
+    //   mediator.publish('foo');
+    //   expect(spy.called).to.be.false;
+    // });
+    // it('should unsubscribe from model events', function() {
+    //   setModel();
+    //   var spy = sinon.spy();
+    //   view.listenTo(view.model, 'foo', spy);
+    //   view.dispose();
+    //   model.trigger('foo');
+    //   expect(spy.called).to.be.false;
+    // });
     it('should remove all event handlers from itself', function() {
-      var spy;
-      spy = sinon.spy();
+      var spy = sinon.spy();
       view.on('foo', spy);
       view.dispose();
       view.trigger('foo');
-      expect(spy).was.notCalled();
+      expect(spy.called).to.be.false;
     });
     it('should remove instance properties', function() {
       view.dispose();
       var properties = ['el', '$el', 'options', 'model', 'collection', 'subviews', 'subviewsByName', '_callbacks'];
       _.each(properties, function(prop) {
-        expect(view).not.to.have.own.property(prop);
+        expect(view).not.to.have.ownProperty(prop);
       });
     });
     it('should dispose itself when the model is disposed', function() {
-      model = new Model();
+      model = new Backbone.Model();
       view = new TestView({
         model: model
       });
-      model.dispose();
-      expect(model.disposed).to.be(true);
-      expect(view.disposed).to.be(true);
+      model.trigger('dispose');
+      // expect(model.disposed).to.be.true;
+      expect(view.disposed).to.be.true;
     });
     it('should dispose itself when the collection is disposed', function() {
-      collection = new Collection();
+      collection = new Backbone.Collection;
       view = new TestView({
         collection: collection
       });
-      collection.dispose();
-      expect(collection.disposed).to.be(true);
-      expect(view.disposed).to.be(true);
+      collection.trigger('dispose');
+      // expect(collection.disposed).to.be.true;
+      expect(view.disposed).to.be.true;
     });
     it('should not dispose itself when the collection model is disposed', function() {
-      collection = new Collection([{a: 1}, {a: 2}, {a: 3}]);
+      collection = new Backbone.Collection([{a: 1}, {a: 2}, {a: 3}]);
       view = new TestView({
         collection: collection
       });
-      collection.at(0).dispose();
-      expect(collection.disposed).to.be(false);
-      expect(view.disposed).to.be(false);
+      collection.at(0).trigger('dispose');
+      // expect(collection.disposed).to.be.false;
+      expect(view.disposed).to.be.false;
     });
     it('should not render when disposed given render wasn’t overridden', function() {
-      var renderResult;
       view = new View();
       view.getTemplateFunction = TestView.prototype.getTemplateFunction;
       sinon.spy(view, 'attach');
-      renderResult = view.render();
-      expect(renderResult).to.be(view);
+      var renderResult = view.render();
+      expect(renderResult).to.equal(view);
       view.dispose();
       renderResult = view.render();
-      expect(renderResult).to.be(false);
-      expect(view.attach.callCount).to.be(1);
+      expect(renderResult).to.be.false;
+      expect(view.attach.callCount).to.equal(1);
     });
     it('should not render when disposed given render was overridden', function() {
-      var initial, renderResult;
-      initial = testbed.children.length;
+      var initial = testbed.children.length;
       view = new TestView({
         container: '#testbed'
       });
       sinon.spy(view, 'attach');
-      renderResult = view.render();
-      expect(renderResult).to.be(view);
-      expect(view.attach.callCount).to.be(1);
-      expect(renderCalled).to.be(true);
-      expect(view.el.parentNode).to.be(testbed);
+      var renderResult = view.render();
+      expect(renderResult).to.equal(view);
+      expect(view.attach.callCount).to.equal(1);
+      expect(renderCalled).to.be.true;
+      expect(view.el.parentNode).to.equal(testbed);
       view.dispose();
       renderResult = view.render();
-      expect(renderResult).to.be(false);
-      expect(renderCalled).to.be(true);
-      expect(testbed.children.length).to.be(initial);
-      expect(view.attach.callCount).to.be(1);
+      expect(renderResult).to.be.false;
+      expect(renderCalled).to.be.true;
+      expect(testbed.children.length).to.equal(initial);
+      expect(view.attach.callCount).to.equal(1);
     });
   });
 });

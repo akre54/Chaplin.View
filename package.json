@@ -15,10 +15,11 @@
   },
   "devDependencies": {
     "jquery": "2",
-    "mocha": "*",
+    "mocha": "~1.18",
     "jsdom": "~0.10.2",
-    "sinon": "*",
-    "chai": "*"
+    "sinon": "~1.9",
+    "chai": "~1.9",
+    "sinon-chai": "~2.5"
   },
   "engines": {
     "node": "*",

@@ -2,3 +2,5 @@
 --check-leaks
 --growl
 --colors
+--require test/helpers/test-helpers
+
